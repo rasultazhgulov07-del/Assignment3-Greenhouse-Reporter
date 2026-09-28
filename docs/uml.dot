@@ -1,0 +1,95 @@
+digraph UML {
+  graph [rankdir=LR, splines=polyline, nodesep=0.50, ranksep=0.85, pad=0.25, bgcolor="white", fontname="Arial"];
+  node [shape=plain, fontname="Arial", fontsize=10];
+  edge [fontname="Arial", fontsize=9, color="black", arrowsize=0.8];
+
+  subgraph cluster_bridge {
+    label="Bridge structure";
+    fontsize=13;
+    fontname="Arial Bold";
+    color="gray50";
+    style="rounded";
+
+    PlantReport [label=<
+      <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5">
+        <TR><TD><B>PlantReport</B><BR/><I>&lt;&lt;abstract&gt;&gt;</I></TD></TR>
+        <TR><TD BORDER="1" SIDES="T" ALIGN="LEFT"># source: PlantDataSource</TD></TR>
+        <TR><TD BORDER="1" SIDES="T" ALIGN="LEFT">+ generate(query): String</TD></TR>
+      </TABLE>>];
+
+    Quick [label=<
+      <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5">
+        <TR><TD><B>QuickPlantReport</B></TD></TR>
+        <TR><TD BORDER="1" SIDES="T" ALIGN="LEFT">+ generate(query): String</TD></TR>
+      </TABLE>>];
+
+    Detailed [label=<
+      <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5">
+        <TR><TD><B>DetailedPlantReport</B></TD></TR>
+        <TR><TD BORDER="1" SIDES="T" ALIGN="LEFT">+ generate(query): String</TD></TR>
+      </TABLE>>];
+
+    Source [label=<
+      <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5">
+        <TR><TD><B>PlantDataSource</B><BR/><I>&lt;&lt;interface&gt;&gt;</I></TD></TR>
+        <TR><TD BORDER="1" SIDES="T" ALIGN="LEFT">+ key(): String<BR ALIGN="LEFT"/>+ read(query): PlantReading</TD></TR>
+      </TABLE>>];
+
+    Local [label=<
+      <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5">
+        <TR><TD><B>LocalGreenhouseSource</B></TD></TR>
+        <TR><TD BORDER="1" SIDES="T" ALIGN="LEFT">+ key(): String<BR ALIGN="LEFT"/>+ read(query): PlantReading</TD></TR>
+      </TABLE>>];
+
+    Remote [label=<
+      <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5">
+        <TR><TD><B>RemoteGreenhouseSource</B></TD></TR>
+        <TR><TD BORDER="1" SIDES="T" ALIGN="LEFT">+ key(): String<BR ALIGN="LEFT"/>+ read(query): PlantReading</TD></TR>
+      </TABLE>>];
+
+    Adapter [label=<
+      <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5">
+        <TR><TD><B>LegacyBotanySensorAdapter</B></TD></TR>
+        <TR><TD BORDER="1" SIDES="T" ALIGN="LEFT">- legacySensor: LegacyBotanySensor</TD></TR>
+        <TR><TD BORDER="1" SIDES="T" ALIGN="LEFT">+ key(): String<BR ALIGN="LEFT"/>+ read(query): PlantReading<BR ALIGN="LEFT"/>- translateFailure(code): PlantDataException</TD></TR>
+      </TABLE>>];
+
+    Quick -> PlantReport [arrowhead="empty", label="extends"];
+    Detailed -> PlantReport [arrowhead="empty", label="extends"];
+    PlantReport -> Source [arrowhead="vee", label="bridge / has-a"];
+    Local -> Source [arrowhead="empty", style="dashed", label="implements"];
+    Remote -> Source [arrowhead="empty", style="dashed", label="implements"];
+    Adapter -> Source [arrowhead="empty", style="dashed", label="implements"];
+  }
+
+  Legacy [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5">
+      <TR><TD><B>LegacyBotanySensor</B></TD></TR>
+      <TR><TD BORDER="1" SIDES="T" ALIGN="LEFT">+ METRICS_ALL: int<BR ALIGN="LEFT"/>+ ERR_OFFLINE: int<BR ALIGN="LEFT"/>+ ERR_BAD_PLANT: int</TD></TR>
+      <TR><TD BORDER="1" SIDES="T" ALIGN="LEFT">+ poll(metricMask: int,<BR ALIGN="LEFT"/>  plantCode: char[]): int</TD></TR>
+    </TABLE>>];
+
+  Selector [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5">
+      <TR><TD><B>SourceSelector</B></TD></TR>
+      <TR><TD BORDER="1" SIDES="T" ALIGN="LEFT">- sources: Map&lt;String, PlantDataSource&gt;</TD></TR>
+      <TR><TD BORDER="1" SIDES="T" ALIGN="LEFT">+ loadInstalled(): SourceSelector<BR ALIGN="LEFT"/>+ select(key): PlantDataSource<BR ALIGN="LEFT"/>+ availableKeys(): Set&lt;String&gt;</TD></TR>
+    </TABLE>>];
+
+  Query [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5">
+      <TR><TD><B>PlantQuery</B></TD></TR>
+      <TR><TD BORDER="1" SIDES="T" ALIGN="LEFT">- plantId: String<BR ALIGN="LEFT"/>- sourceKey: String</TD></TR>
+    </TABLE>>];
+
+  Reading [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5">
+      <TR><TD><B>PlantReading</B></TD></TR>
+      <TR><TD BORDER="1" SIDES="T" ALIGN="LEFT">- temperatureC: double<BR ALIGN="LEFT"/>- moisturePercent: int<BR ALIGN="LEFT"/>- lightPercent: int</TD></TR>
+    </TABLE>>];
+
+  Adapter -> Legacy [dir="both", arrowtail="diamond", arrowhead="vee", label="wraps / adapts"];
+  Selector -> Source [arrowhead="vee", label="selects at runtime"];
+  Source -> Query [style="dotted", arrowhead="vee", label="uses"];
+  Source -> Reading [style="dotted", arrowhead="vee", label="returns"];
+}

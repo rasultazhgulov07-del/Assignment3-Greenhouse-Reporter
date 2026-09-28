@@ -1,0 +1,22 @@
+1. Create an EMPTY GitHub repository, for example: assignment3-greenhouse-reporter
+2. Open PowerShell inside this project folder.
+3. Run these commands:
+
+git init
+git add .
+git commit -m "Complete Assignment 3 Bridge and Adapter"
+git branch -M main
+git remote add origin YOUR_GITHUB_REPOSITORY_URL
+git push -u origin main
+
+If the repository is already connected, use:
+
+git add .
+git commit -m "Finish Assignment 3"
+git push
+
+Before pushing, run:
+
+mvn clean test
+
+Expected result: all 7 tests pass.
